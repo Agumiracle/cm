@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolGuard - School Registration & Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 8px;
+            border-radius: 16px;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .nav-tab:hover { background: rgba(255,255,255,0.1); }
+        .nav-tab.active { background: white; color: var(--primary); box-shadow: var(--shadow-md); }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 35px 40px 25px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        .logo { font-size: 2.5rem; margin-bottom: 10px; }
+        .card-header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 8px; position: relative; z-index: 1; }
+        .card-header p { opacity: 0.9; font-size: 0.95rem; position: relative; z-index: 1; }
+
+        .card-body { padding: 35px 40px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .card-header { padding: 25px 20px 20px; }
+            .card-body { padding: 25px 20px; }
+            .nav-tab { font-size: 0.8rem; padding: 10px 12px; }
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        label .required { color: var(--error); }
+
+        .input-wrapper { position: relative; }
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--gray-800);
+            background: var(--gray-50);
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        input::placeholder { color: var(--gray-400); }
+        input:disabled { background: var(--gray-100); cursor: not-allowed; opacity: 0.7; }
+
+        .school-id-display {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #e0e7ff 100%);
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .school-id-display label { justify-content: center; margin-bottom: 8px; color: var(--primary-dark); }
+        .school-id-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+        .school-id-hint { font-size: 0.8rem; color: var(--gray-500); margin-top: 6px; }
+
+        .plan-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .plan-cards { grid-template-columns: 1fr; }
+        }
+
+        .plan-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .plan-card:hover { border-color: var(--primary); background: var(--primary-light); }
+        .plan-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .plan-card h4 { font-size: 0.9rem; color: var(--gray-800); margin-bottom: 4px; }
+        .plan-card .price { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+        .plan-card .price span { font-size: 0.8rem; color: var(--gray-500); font-weight: 400; }
+        .plan-card .features { font-size: 0.75rem; color: var(--gray-500); margin-top: 6px; }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        textarea { padding-left: 14px; min-height: 80px; resize: vertical; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-warning:hover { background: #d97706; }
+
+        .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+        .btn-secondary:hover { background: var(--gray-300); }
+
+        .btn-block { width: 100%; }
+        .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+
+        .form-footer { margin-top: 30px; text-align: center; }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+        .alert.show { display: flex; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-loading { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 30px 0;
+            color: var(--gray-400);
+            font-size: 0.85rem;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+
+        .schools-list { margin-top: 25px; }
+        .schools-list h3 {
+            font-size: 1.1rem;
+            color: var(--gray-800);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .school-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        .school-item:hover { background: white; box-shadow: var(--shadow-sm); }
+
+        .school-item-info h4 { font-size: 0.9rem; color: var(--gray-800); }
+        .school-item-info p { font-size: 0.8rem; color: var(--gray-500); }
+
+        .school-item-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-active { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-suspended { background: #fee2e2; color: #991b1b; }
+        .status-expired { background: #fee2e2; color: #991b1b; }
+
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+        .stat-item { text-align: center; flex: 1; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.7rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .hidden { display: none !important; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2.5rem;
+        }
+        .modal h2 { font-size: 1.5rem; color: var(--gray-800); margin-bottom: 8px; }
+        .modal p { color: var(--gray-500); margin-bottom: 24px; }
+
+        .modal .school-id-big {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+            background: var(--primary-light);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 2px dashed var(--primary);
+        }
+
+        .copy-btn {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-300);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: var(--gray-200); }
+        .copy-btn.copied { background: var(--success); color: white; border-color: var(--success); }
+
+        /* Subscription info */
+        .sub-info {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 20px;
+        }
+        .sub-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.9rem;
+        }
+        .sub-info-row:last-child { border-bottom: none; }
+        .sub-info-label { color: var(--gray-500); }
+        .sub-info-value { font-weight: 600; color: var(--gray-800); }
+
+        .expiry-warning {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .expiry-danger {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        /* Search box */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            padding-left: 42px;
+            font-size: 1rem;
+        }
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        /* Renew section */
+        .renew-section {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .renew-section h4 {
+            font-size: 1rem;
+            color: var(--gray-800);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .months-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .month-chip {
+            padding: 8px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: white;
+        }
+        .month-chip:hover { border-color: var(--primary); }
+        .month-chip.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .price-preview {
+            background: white;
+            border: 2px solid var(--primary-light);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .price-preview .amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .price-preview .detail {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+
+        .confirm-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid var(--gray-200);
+        }
+        .confirm-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+        .confirm-check label {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-400);
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 12px; display: block; }
+
+        .school-actions {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('register')">
+                <i class="fas fa-plus-circle"></i> Register School
+            </button>
+            <button class="nav-tab" onclick="switchTab('manage')">
+                <i class="fas fa-list"></i> All Schools
+            </button>
+            <button class="nav-tab" onclick="switchTab('renew')">
+                <i class="fas fa-sync-alt"></i> Renew Subscription
+            </button>
+        </div>
+
+        <!-- REGISTER TAB -->
+        <div id="tab-register" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <div class="logo">🏫</div>
+                    <h1>Register New School</h1>
+                    <p>Get your unique School ID and start managing attendance</p>
+                </div>
+                <div class="card-body">
+                    <!-- Alerts -->
+                    <div class="alert alert-loading" id="regLoadingAlert">
+                        <div class="spinner"></div>
+                        <span>Loading...</span>
+                    </div>
+                    <div class="alert alert-success" id="regSuccessAlert">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="regSuccessMsg">School registered successfully!</span>
+                    </div>
+                    <div class="alert alert-error" id="regErrorAlert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="regErrorMsg">Something went wrong.</span>
+                    </div>
+
+                    <!-- School ID Preview -->
+                    <div class="school-id-display">
+                        <label><i class="fas fa-id-card"></i> Your School ID will be</label>
+                        <div class="school-id-value" id="schoolIdPreview">Enter school name to generate ID</div>
+                        <div class="school-id-hint">Format: SCH- + first 2 letters + last 2 letters of school name + 4 random digits</div>
+                    </div>
+
+                    <form id="registerForm">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="regSchoolName">School Name <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-school"></i>
+                                    <input type="text" id="regSchoolName" placeholder="e.g., Sunshine Primary School" required oninput="generateSchoolId()">
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="regAddress">Address <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <input type="text" id="regAddress" placeholder="e.g., 123 Education Street, Lagos" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="regEmail">Contact Email <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-envelope"></i>
+                                    <input type="email" id="regEmail" placeholder="admin@school.edu" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="regPhone">Contact Phone <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-phone"></i>
+                                    <input type="tel" id="regPhone" placeholder="+234XXXXXXXXXX" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Select Plan <span class="required">*</span></label>
+                                <div class="plan-cards">
+                                    <div class="plan-card selected" data-plan="Free" data-price="0" data-max-students="50" data-max-attendants="2">
+                                        <h4>Free</h4>
+                                        <div class="price">₦0 <span>/month</span></div>
+                                        <div class="features">50 students · 2 attendants</div>
+                                    </div>
+                                    <div class="plan-card" data-plan="Basic" data-price="5000" data-max-students="200" data-max-attendants="5">
+                                        <h4>Basic</h4>
+                                        <div class="price">₦5,000 <span>/month</span></div>
+                                        <div class="features">200 students · 5 attendants</div>
+                                    </div>
+                                    <div class="plan-card" data-plan="Premium" data-price="15000" data-max-students="1000" data-max-attendants="20">
+                                        <h4>Premium</h4>
+                                        <div class="price">₦15,000 <span>/month</span></div>
+                                        <div class="features">1000 students · 20 attendants</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="regPlan" value="Free">
+                                <input type="hidden" id="regPrice" value="0">
+                                <input type="hidden" id="regMaxStudents" value="50">
+                                <input type="hidden" id="regMaxAttendants" value="2">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="regMonths">Subscription Duration <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <select id="regMonths" onchange="updateTotalPrice()">
+                                        <option value="1">1 month</option>
+                                        <option value="3">3 months (5% off)</option>
+                                        <option value="6" selected>6 months (10% off)</option>
+                                        <option value="12">12 months (20% off)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <div class="price-preview" id="pricePreview">
+                                    <div class="amount" id="totalPrice">₦0</div>
+                                    <div class="detail" id="priceDetail">Free plan - No payment required</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="regStatus">Initial Status</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-toggle-on"></i>
+                                    <select id="regStatus">
+                                        <option value="Active" selected>Active</option>
+                                        <option value="Pending">Pending</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="regDate">Registration Date</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-calendar"></i>
+                                    <input type="date" id="regDate" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <button type="submit" class="btn btn-primary btn-block" id="regSubmitBtn">
+                                <i class="fas fa-plus-circle"></i> Register School
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- MANAGE SCHOOLS TAB -->
+        <div id="tab-manage" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="logo">📋</div>
+                    <h1>All Schools</h1>
+                    <p>View and manage registered schools</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-loading" id="manageLoadingAlert">
+                        <div class="spinner"></div>
+                        <span>Loading schools...</span>
+                    </div>
+
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <div class="stat-value" id="statTotal">-</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="statActive">-</div>
+                            <div class="stat-label">Active</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="statPending">-</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="statSuspended">-</div>
+                            <div class="stat-label">Suspended</div>
+                        </div>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchSchools" placeholder="Search by name or ID..." oninput="filterSchools()">
+                    </div>
+
+                    <div id="schoolsListContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-school"></i>
+                            <p>Loading schools...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RENEW SUBSCRIPTION TAB -->
+        <div id="tab-renew" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="logo">🔄</div>
+                    <h1>Renew Subscription</h1>
+                    <p>Extend or renew your school's subscription</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-loading" id="renewLoadingAlert">
+                        <div class="spinner"></div>
+                        <span>Loading...</span>
+                    </div>
+                    <div class="alert alert-success" id="renewSuccessAlert">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="renewSuccessMsg">Subscription renewed successfully!</span>
+                    </div>
+                    <div class="alert alert-error" id="renewErrorAlert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="renewErrorMsg">Something went wrong.</span>
+                    </div>
+
+                    <!-- Step 1: Find School -->
+                    <div id="renewStep1">
+                        <div class="form-group full-width" style="margin-bottom: 20px;">
+                            <label for="renewSchoolId">Enter School ID <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-id-card"></i>
+                                <input type="text" id="renewSchoolId" placeholder="e.g., SCH-SUOL-7392" oninput="this.value = this.value.toUpperCase()">
+                            </div>
+                        </div>
+                        <div class="form-footer">
+                            <button class="btn btn-primary btn-block" onclick="findSchoolForRenew()">
+                                <i class="fas fa-search"></i> Find School
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Confirm & Renew -->
+                    <div id="renewStep2" class="hidden">
+                        <div class="school-id-display" style="margin-bottom: 20px;">
+                            <label><i class="fas fa-school"></i> School Found</label>
+                            <div class="school-id-value" id="renewSchoolName">-</div>
+                            <div class="school-id-hint" id="renewSchoolIdDisplay">-</div>
+                        </div>
+
+                        <div class="sub-info" id="renewSubInfo">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <div id="renewExpiryWarning" class="hidden">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <div class="renew-section">
+                            <h4><i class="fas fa-calendar-plus"></i> Select Renewal Duration</h4>
+                            <div class="months-selector">
+                                <div class="month-chip selected" data-months="1" onclick="selectRenewMonths(1)">1 month</div>
+                                <div class="month-chip" data-months="3" onclick="selectRenewMonths(3)">3 months <span style="color:var(--success)">5% off</span></div>
+                                <div class="month-chip" data-months="6" onclick="selectRenewMonths(6)">6 months <span style="color:var(--success)">10% off</span></div>
+                                <div class="month-chip" data-months="12" onclick="selectRenewMonths(12)">12 months <span style="color:var(--success)">20% off</span></div>
+                            </div>
+
+                            <div class="price-preview" id="renewPricePreview">
+                                <div class="amount" id="renewTotalPrice">₦0</div>
+                                <div class="detail" id="renewPriceDetail">Select duration to see price</div>
+                            </div>
+                        </div>
+
+                        <div class="confirm-check">
+                            <input type="checkbox" id="confirmRenew" onchange="toggleRenewButton()">
+                            <label for="confirmRenew">I confirm I want to renew subscription for <strong id="confirmSchoolName">-</strong></label>
+                        </div>
+
+                        <div class="form-footer">
+                            <button class="btn btn-secondary" onclick="backToRenewSearch()" style="margin-bottom: 10px;">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <button class="btn btn-success btn-block" id="renewSubmitBtn" disabled onclick="submitRenewal()">
+                                <i class="fas fa-sync-alt"></i> Renew Subscription
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal">
+            <div class="modal-icon"><i class="fas fa-check"></i></div>
+            <h2 id="modalTitle">School Registered!</h2>
+            <p id="modalDesc">Your school has been successfully added to SchoolGuard.</p>
+            <div class="school-id-big" id="modalSchoolId">SCH-XXXX</div>
+            <button class="copy-btn" id="copyBtn" onclick="copySchoolId()">
+                <i class="fas fa-copy"></i> Copy School ID
+            </button>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="closeModal()">
+                    <i class="fas fa-plus"></i> <span id="modalBtnText">Register Another</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION - Replace with your GAS URL
+        // ============================================
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxT-WnC39nUDjvJzIHSwghSKLNKtaRKrVbDdJMtAqmc1PxdU7qpWZnXMCNp5HlfFp9FfQ/exec';
+
+        // ============================================
+        // STATE
+        // ============================================
+        let allSchools = [];
+        let currentRenewSchool = null;
+        let selectedRenewMonths = 1;
+        let generatedSchoolId = '';
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('regDate').value = new Date().toISOString().split('T')[0];
+            setupPlanCards();
+            updateTotalPrice();
+        });
+
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            event.target.closest('.nav-tab').classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            if (tab === 'manage') {
+                loadAllSchools();
+            }
+        }
+
+        // ============================================
+        // SCHOOL ID GENERATION
+        // Pattern: SCH- + first 2 letters + last 2 letters of school name + 4 random digits
+        // Example: "Sunshine Primary School" → SCH-SUOL-7392
+        // ============================================
+        function generateSchoolId() {
+            const name = document.getElementById('regSchoolName').value.trim();
+            const preview = document.getElementById('schoolIdPreview');
+
+            if (name.length < 2) {
+                preview.textContent = 'Enter school name to generate ID';
+                preview.style.color = 'var(--gray-400)';
+                generatedSchoolId = '';
+                return;
+            }
+
+            // Extract first 2 letters
+            const first2 = name.substring(0, 2).toUpperCase();
+
+            // Extract last 2 letters (ignoring trailing spaces)
+            const cleanName = name.trim();
+            const last2 = cleanName.substring(cleanName.length - 2).toUpperCase();
+
+            // Generate 4 random digits
+            const random4 = Math.floor(1000 + Math.random() * 9000);
+
+            generatedSchoolId = `SCH-${first2}${last2}-${random4}`;
+
+            preview.textContent = generatedSchoolId;
+            preview.style.color = 'var(--primary)';
+        }
+
+        // ============================================
+        // PLAN SELECTION
+        // ============================================
+        function setupPlanCards() {
+            document.querySelectorAll('#tab-register .plan-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('#tab-register .plan-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    document.getElementById('regPlan').value = card.dataset.plan;
+                    document.getElementById('regPrice').value = card.dataset.price;
+                    document.getElementById('regMaxStudents').value = card.dataset.maxStudents;
+                    document.getElementById('regMaxAttendants').value = card.dataset.maxAttendants;
+                    updateTotalPrice();
+                });
+            });
+        }
+
+        function updateTotalPrice() {
+            const price = parseInt(document.getElementById('regPrice').value) || 0;
+            const months = parseInt(document.getElementById('regMonths').value) || 1;
+            const plan = document.getElementById('regPlan').value;
+
+            let discount = 0;
+            if (months === 3) discount = 0.05;
+            else if (months === 6) discount = 0.10;
+            else if (months === 12) discount = 0.20;
+
+            const subtotal = price * months;
+            const discountAmount = Math.round(subtotal * discount);
+            const total = subtotal - discountAmount;
+
+            const formatter = new Intl.NumberFormat('en-NG', {
+                style: 'currency',
+                currency: 'NGN',
+                minimumFractionDigits: 0
+            });
+
+            document.getElementById('totalPrice').textContent = formatter.format(total);
+
+            if (plan === 'Free') {
+                document.getElementById('priceDetail').textContent = 'Free plan - No payment required';
+            } else {
+                let detail = `${months} months × ₦${price.toLocaleString()}/month`;
+                if (discount > 0) {
+                    detail += ` (-${(discount * 100)}% discount: ₦${discountAmount.toLocaleString()})`;
+                }
+                document.getElementById('priceDetail').textContent = detail;
+            }
+        }
+
+        // ============================================
+        // REGISTRATION FORM SUBMIT
+        // ============================================
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!generatedSchoolId) {
+                showAlert('regError', 'Please enter a school name first');
+                return;
+            }
+
+            const btn = document.getElementById('regSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="border-color:white;border-right-color:transparent;width:16px;height:16px;"></div> Registering...';
+
+            hideAlert('regSuccess');
+            hideAlert('regError');
+
+            const today = new Date();
+            const months = parseInt(document.getElementById('regMonths').value);
+            const expiryDate = new Date(today);
+            expiryDate.setMonth(expiryDate.getMonth() + months);
+
+            const formData = {
+                action: 'registerSchool',
+                schoolId: generatedSchoolId,
+                schoolName: document.getElementById('regSchoolName').value.trim(),
+                address: document.getElementById('regAddress').value.trim(),
+                contactEmail: document.getElementById('regEmail').value.trim(),
+                contactPhone: document.getElementById('regPhone').value.trim(),
+                plan: document.getElementById('regPlan').value,
+                status: document.getElementById('regStatus').value,
+                createdDate: document.getElementById('regDate').value,
+                expiryDate: expiryDate.toISOString().split('T')[0],
+                subscriptionMonths: months,
+                maxStudents: parseInt(document.getElementById('regMaxStudents').value),
+                maxAttendants: parseInt(document.getElementById('regMaxAttendants').value)
+            };
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('modalTitle').textContent = 'School Registered!';
+                    document.getElementById('modalDesc').textContent = 'Your school has been successfully added to SchoolGuard.';
+                    document.getElementById('modalSchoolId').textContent = generatedSchoolId;
+                    document.getElementById('modalBtnText').textContent = 'Register Another School';
+                    document.getElementById('successModal').classList.add('show');
+
+                    document.getElementById('registerForm').reset();
+                    document.getElementById('regDate').value = new Date().toISOString().split('T')[0];
+                    document.querySelector('#tab-register .plan-card[data-plan="Free"]').click();
+                    document.getElementById('schoolIdPreview').textContent = 'Enter school name to generate ID';
+                    document.getElementById('schoolIdPreview').style.color = 'var(--gray-400)';
+                    generatedSchoolId = '';
+                } else {
+                    showAlert('regError', result.error || 'Failed to register school');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('regError', 'Network error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus-circle"></i> Register School';
+            }
+        });
+
+        // ============================================
+        // LOAD ALL SCHOOLS (Manage Tab)
+        // ============================================
+        async function loadAllSchools() {
+            showAlert('manageLoading');
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getAllSchools' })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    allSchools = result.data || [];
+                    updateStatsBar();
+                    renderSchoolsList(allSchools);
+                } else {
+                    document.getElementById('schoolsListContainer').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-circle" style="color:var(--error)"></i>
+                            <p>Error loading schools: ${result.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('schoolsListContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-wifi" style="color:var(--error)"></i>
+                        <p>Network error. Please check your connection.</p>
+                    </div>
+                `;
+            } finally {
+                hideAlert('manageLoading');
+            }
+        }
+
+        function updateStatsBar() {
+            const total = allSchools.length;
+            const active = allSchools.filter(s => s.Status === 'Active').length;
+            const pending = allSchools.filter(s => s.Status === 'Pending').length;
+            const suspended = allSchools.filter(s => s.Status === 'Suspended' || s.Status === 'Expired').length;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statSuspended').textContent = suspended;
+        }
+
+        function renderSchoolsList(schools) {
+            const container = document.getElementById('schoolsListContainer');
+
+            if (schools.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-school"></i>
+                        <p>No schools registered yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = schools.map(school => {
+                const statusClass = school.Status?.toLowerCase() === 'active' ? 'status-active' :
+                                   school.Status?.toLowerCase() === 'pending' ? 'status-pending' :
+                                   school.Status?.toLowerCase() === 'suspended' ? 'status-suspended' : 'status-expired';
+
+                const isExpired = isSubscriptionExpired(school.Expiry_Date);
+                const expiryText = school.Expiry_Date ? formatDate(school.Expiry_Date) : 'N/A';
+                const expiredBadge = isExpired ? '<span class="status-badge status-expired" style="margin-left:8px;">EXPIRED</span>' : '';
+
+                return `
+                    <div class="school-item">
+                        <div class="school-item-info">
+                            <h4>${escapeHtml(school.School_Name || 'Unnamed')}</h4>
+                            <p>${escapeHtml(school.Address || 'No address')} · ${school.Plan || 'Free'} Plan · Expires: ${expiryText}</p>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span class="status-badge ${statusClass}">${school.Status || 'Unknown'}</span>
+                            ${expiredBadge}
+                            <div class="school-item-id">${school.School_ID || 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterSchools() {
+            const query = document.getElementById('searchSchools').value.toLowerCase().trim();
+            if (!query) {
+                renderSchoolsList(allSchools);
+                return;
+            }
+            const filtered = allSchools.filter(s =>
+                (s.School_Name || '').toLowerCase().includes(query) ||
+                (s.School_ID || '').toLowerCase().includes(query)
+            );
+            renderSchoolsList(filtered);
+        }
+
+        // ============================================
+        // RENEW SUBSCRIPTION
+        // ============================================
+        async function findSchoolForRenew() {
+            const schoolId = document.getElementById('renewSchoolId').value.trim().toUpperCase();
+            if (!schoolId) {
+                showAlert('renewError', 'Please enter a School ID');
+                return;
+            }
+
+            hideAlert('renewError');
+            hideAlert('renewSuccess');
+            showAlert('renewLoading');
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getSchool', schoolId: schoolId })
+                });
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    currentRenewSchool = result.data;
+                    showRenewStep2();
+                } else {
+                    showAlert('renewError', 'School not found. Please check the School ID.');
+                }
+            } catch (error) {
+                showAlert('renewError', 'Network error. Please try again.');
+            } finally {
+                hideAlert('renewLoading');
+            }
+        }
+
+        function showRenewStep2() {
+            document.getElementById('renewStep1').classList.add('hidden');
+            document.getElementById('renewStep2').classList.remove('hidden');
+
+            document.getElementById('renewSchoolName').textContent = currentRenewSchool.School_Name;
+            document.getElementById('renewSchoolIdDisplay').textContent = currentRenewSchool.School_ID;
+            document.getElementById('confirmSchoolName').textContent = currentRenewSchool.School_Name;
+
+            // Populate subscription info
+            const expiryDate = currentRenewSchool.Expiry_Date ? new Date(currentRenewSchool.Expiry_Date) : null;
+            const today = new Date();
+            const isExpired = expiryDate ? today > expiryDate : true;
+            const daysRemaining = expiryDate ? Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24)) : 0;
+
+            let statusHtml = `
+                <div class="sub-info-row">
+                    <span class="sub-info-label">Current Plan</span>
+                    <span class="sub-info-value">${currentRenewSchool.Plan || 'Free'}</span>
+                </div>
+                <div class="sub-info-row">
+                    <span class="sub-info-label">Status</span>
+                    <span class="sub-info-value">${currentRenewSchool.Status || 'Unknown'}</span>
+                </div>
+                <div class="sub-info-row">
+                    <span class="sub-info-label">Current Expiry</span>
+                    <span class="sub-info-value">${currentRenewSchool.Expiry_Date ? formatDate(currentRenewSchool.Expiry_Date) : 'Not set'}</span>
+                </div>
+                <div class="sub-info-row">
+                    <span class="sub-info-label">Students Limit</span>
+                    <span class="sub-info-value">${currentRenewSchool.Max_Students || 'N/A'}</span>
+                </div>
+                <div class="sub-info-row">
+                    <span class="sub-info-label">Attendants Limit</span>
+                    <span class="sub-info-value">${currentRenewSchool.Max_Attendants || 'N/A'}</span>
+                </div>
+            `;
+
+            if (!isExpired && daysRemaining > 0) {
+                statusHtml += `
+                    <div class="sub-info-row">
+                        <span class="sub-info-label">Days Remaining</span>
+                        <span class="sub-info-value" style="color:var(--success)">${daysRemaining} days</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('renewSubInfo').innerHTML = statusHtml;
+
+            // Show expiry warning
+            const warningDiv = document.getElementById('renewExpiryWarning');
+            if (isExpired) {
+                warningDiv.classList.remove('hidden');
+                warningDiv.className = 'expiry-warning expiry-danger';
+                warningDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Subscription has expired! Renew now to reactivate.`;
+            } else if (daysRemaining <= 7) {
+                warningDiv.classList.remove('hidden');
+                warningDiv.className = 'expiry-warning';
+                warningDiv.innerHTML = `<i class="fas fa-clock"></i> Subscription expires in ${daysRemaining} days. Renew now to avoid interruption.`;
+            } else {
+                warningDiv.classList.add('hidden');
+            }
+
+            // Calculate price
+            calculateRenewPrice();
+        }
+
+        function selectRenewMonths(months) {
+            selectedRenewMonths = months;
+            document.querySelectorAll('#tab-renew .month-chip').forEach(chip => {
+                chip.classList.toggle('selected', parseInt(chip.dataset.months) === months);
+            });
+            calculateRenewPrice();
+        }
+
+        function calculateRenewPrice() {
+            if (!currentRenewSchool) return;
+
+            const plan = currentRenewSchool.Plan || 'Free';
+            const pricePerMonth = plan === 'Free' ? 0 : plan === 'Basic' ? 5000 : 15000;
+
+            let discount = 0;
+            if (selectedRenewMonths === 3) discount = 0.05;
+            else if (selectedRenewMonths === 6) discount = 0.10;
+            else if (selectedRenewMonths === 12) discount = 0.20;
+
+            const subtotal = pricePerMonth * selectedRenewMonths;
+            const discountAmount = Math.round(subtotal * discount);
+            const total = subtotal - discountAmount;
+
+            const formatter = new Intl.NumberFormat('en-NG', {
+                style: 'currency',
+                currency: 'NGN',
+                minimumFractionDigits: 0
+            });
+
+            document.getElementById('renewTotalPrice').textContent = formatter.format(total);
+
+            if (plan === 'Free') {
+                document.getElementById('renewPriceDetail').textContent = 'Free plan - No payment required';
+            } else {
+                let detail = `${selectedRenewMonths} months × ₦${pricePerMonth.toLocaleString()}/month`;
+                if (discount > 0) {
+                    detail += ` (-${(discount * 100)}% discount)`;
+                }
+                document.getElementById('renewPriceDetail').textContent = detail;
+            }
+        }
+
+        function toggleRenewButton() {
+            const checked = document.getElementById('confirmRenew').checked;
+            document.getElementById('renewSubmitBtn').disabled = !checked;
+        }
+
+        function backToRenewSearch() {
+            document.getElementById('renewStep2').classList.add('hidden');
+            document.getElementById('renewStep1').classList.remove('hidden');
+            document.getElementById('renewSchoolId').value = '';
+            document.getElementById('confirmRenew').checked = false;
+            document.getElementById('renewSubmitBtn').disabled = true;
+            currentRenewSchool = null;
+            hideAlert('renewError');
+            hideAlert('renewSuccess');
+        }
+
+        async function submitRenewal() {
+            if (!currentRenewSchool) return;
+
+            const btn = document.getElementById('renewSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="border-color:white;border-right-color:transparent;width:16px;height:16px;"></div> Processing...';
+
+            hideAlert('renewError');
+            hideAlert('renewSuccess');
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'renewSubscription',
+                        schoolId: currentRenewSchool.School_ID,
+                        months: selectedRenewMonths
+                    })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('modalTitle').textContent = 'Subscription Renewed!';
+                    document.getElementById('modalDesc').textContent = `Subscription for ${currentRenewSchool.School_Name} has been extended.`;
+                    document.getElementById('modalSchoolId').textContent = currentRenewSchool.School_ID;
+                    document.getElementById('modalBtnText').textContent = 'Renew Another';
+                    document.getElementById('successModal').classList.add('show');
+
+                    backToRenewSearch();
+                } else {
+                    showAlert('renewError', result.error || 'Failed to renew subscription');
+                }
+            } catch (error) {
+                showAlert('renewError', 'Network error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Renew Subscription';
+            }
+        }
+
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('show');
+            document.getElementById('copyBtn').classList.remove('copied');
+            document.getElementById('copyBtn').innerHTML = '<i class="fas fa-copy"></i> Copy School ID';
+        }
+
+        function copySchoolId() {
+            const id = document.getElementById('modalSchoolId').textContent;
+            navigator.clipboard.writeText(id).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            });
+        }
+
+        // ============================================
+        // ALERT UTILITIES
+        // ============================================
+        function showAlert(type, message) {
+            if (type === 'regLoading') document.getElementById('regLoadingAlert').classList.add('show');
+            else if (type === 'regSuccess') { document.getElementById('regSuccessMsg').textContent = message; document.getElementById('regSuccessAlert').classList.add('show'); }
+            else if (type === 'regError') { document.getElementById('regErrorMsg').textContent = message; document.getElementById('regErrorAlert').classList.add('show'); }
+            else if (type === 'manageLoading') document.getElementById('manageLoadingAlert').classList.add('show');
+            else if (type === 'renewLoading') document.getElementById('renewLoadingAlert').classList.add('show');
+            else if (type === 'renewSuccess') { document.getElementById('renewSuccessMsg').textContent = message; document.getElementById('renewSuccessAlert').classList.add('show'); }
+            else if (type === 'renewError') { document.getElementById('renewErrorMsg').textContent = message; document.getElementById('renewErrorAlert').classList.add('show'); }
+        }
+
+        function hideAlert(type) {
+            if (type === 'regLoading') document.getElementById('regLoadingAlert').classList.remove('show');
+            else if (type === 'regSuccess') document.getElementById('regSuccessAlert').classList.remove('show');
+            else if (type === 'regError') document.getElementById('regErrorAlert').classList.remove('show');
+            else if (type === 'manageLoading') document.getElementById('manageLoadingAlert').classList.remove('show');
+            else if (type === 'renewLoading') document.getElementById('renewLoadingAlert').classList.remove('show');
+            else if (type === 'renewSuccess') document.getElementById('renewSuccessAlert').classList.remove('show');
+            else if (type === 'renewError') document.getElementById('renewErrorAlert').classList.remove('show');
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function isSubscriptionExpired(expiryDateStr) {
+            if (!expiryDateStr) return true;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const expiry = new Date(expiryDateStr);
+            expiry.setHours(0, 0, 0, 0);
+            return today > expiry;
+        }
+
+        document.getElementById('successModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('successModal')) closeModal();
+        });
+    </script>
+</body>
+</html>
