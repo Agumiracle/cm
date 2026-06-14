@@ -908,7 +908,7 @@
         // ============================================
         // CONFIGURATION - Replace with your GAS URL
         // ============================================
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxT-WnC39nUDjvJzIHSwghSKLNKtaRKrVbDdJMtAqmc1PxdU7qpWZnXMCNp5HlfFp9FfQ/exec';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwT9EETZrhtUh0Nn0dm2_SLAg8TWnqG4trt6VR2TQ2E6BLGIFbCgc5014QnCIOOw0rCJA/exec';
 
         // ============================================
         // STATE
@@ -917,6 +917,25 @@
         let currentRenewSchool = null;
         let selectedRenewMonths = 1;
         let generatedSchoolId = '';
+
+        // ============================================
+        // HELPER: Build URL with query params (GET)
+        // This avoids CORS preflight issues completely
+        // ============================================
+        function buildUrl(params) {
+            const url = new URL(GAS_URL);
+            for (const [key, value] of Object.entries(params)) {
+                if (value !== undefined && value !== null) {
+                    url.searchParams.append(key, String(value));
+                }
+            }
+            return url.toString();
+        }
+
+        async function gasGet(params) {
+            const res = await fetch(buildUrl(params));
+            return await res.json();
+        }
 
         // ============================================
         // INITIALIZATION
@@ -944,8 +963,6 @@
 
         // ============================================
         // SCHOOL ID GENERATION
-        // Pattern: SCH- + first 2 letters + last 2 letters of school name + 4 random digits
-        // Example: "Sunshine Primary School" → SCH-SUOL-7392
         // ============================================
         function generateSchoolId() {
             const name = document.getElementById('regSchoolName').value.trim();
@@ -958,17 +975,12 @@
                 return;
             }
 
-            // Extract first 2 letters
             const first2 = name.substring(0, 2).toUpperCase();
-
-            // Extract last 2 letters (ignoring trailing spaces)
             const cleanName = name.trim();
             const last2 = cleanName.substring(cleanName.length - 2).toUpperCase();
-
-            // Generate 4 random digits
             const random4 = Math.floor(1000 + Math.random() * 9000);
 
-            generatedSchoolId = `SCH-${first2}${last2}-${random4}`;
+            generatedSchoolId = 'SCH-' + first2 + last2 + '-' + random4;
 
             preview.textContent = generatedSchoolId;
             preview.style.color = 'var(--primary)';
@@ -1016,16 +1028,16 @@
             if (plan === 'Free') {
                 document.getElementById('priceDetail').textContent = 'Free plan - No payment required';
             } else {
-                let detail = `${months} months × ₦${price.toLocaleString()}/month`;
+                let detail = months + ' months × ₦' + price.toLocaleString() + '/month';
                 if (discount > 0) {
-                    detail += ` (-${(discount * 100)}% discount: ₦${discountAmount.toLocaleString()})`;
+                    detail += ' (-' + (discount * 100) + '% discount: ₦' + discountAmount.toLocaleString() + ')';
                 }
                 document.getElementById('priceDetail').textContent = detail;
             }
         }
 
         // ============================================
-        // REGISTRATION FORM SUBMIT
+        // REGISTRATION FORM SUBMIT - USING GET
         // ============================================
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1047,29 +1059,22 @@
             const expiryDate = new Date(today);
             expiryDate.setMonth(expiryDate.getMonth() + months);
 
-            const formData = {
-                action: 'registerSchool',
-                schoolId: generatedSchoolId,
-                schoolName: document.getElementById('regSchoolName').value.trim(),
-                address: document.getElementById('regAddress').value.trim(),
-                contactEmail: document.getElementById('regEmail').value.trim(),
-                contactPhone: document.getElementById('regPhone').value.trim(),
-                plan: document.getElementById('regPlan').value,
-                status: document.getElementById('regStatus').value,
-                createdDate: document.getElementById('regDate').value,
-                expiryDate: expiryDate.toISOString().split('T')[0],
-                subscriptionMonths: months,
-                maxStudents: parseInt(document.getElementById('regMaxStudents').value),
-                maxAttendants: parseInt(document.getElementById('regMaxAttendants').value)
-            };
-
             try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                const result = await gasGet({
+                    action: 'registerSchool',
+                    schoolId: generatedSchoolId,
+                    schoolName: document.getElementById('regSchoolName').value.trim(),
+                    address: document.getElementById('regAddress').value.trim(),
+                    contactEmail: document.getElementById('regEmail').value.trim(),
+                    contactPhone: document.getElementById('regPhone').value.trim(),
+                    plan: document.getElementById('regPlan').value,
+                    status: document.getElementById('regStatus').value,
+                    createdDate: document.getElementById('regDate').value,
+                    expiryDate: expiryDate.toISOString().split('T')[0],
+                    subscriptionMonths: months,
+                    maxStudents: parseInt(document.getElementById('regMaxStudents').value),
+                    maxAttendants: parseInt(document.getElementById('regMaxAttendants').value)
                 });
-                const result = await response.json();
 
                 if (result.success) {
                     document.getElementById('modalTitle').textContent = 'School Registered!';
@@ -1097,38 +1102,25 @@
         });
 
         // ============================================
-        // LOAD ALL SCHOOLS (Manage Tab)
+        // LOAD ALL SCHOOLS - USING GET
         // ============================================
         async function loadAllSchools() {
             showAlert('manageLoading');
 
             try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getAllSchools' })
-                });
-                const result = await response.json();
+                const result = await gasGet({ action: 'getAllSchools' });
 
                 if (result.success) {
                     allSchools = result.data || [];
                     updateStatsBar();
                     renderSchoolsList(allSchools);
                 } else {
-                    document.getElementById('schoolsListContainer').innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-exclamation-circle" style="color:var(--error)"></i>
-                            <p>Error loading schools: ${result.error}</p>
-                        </div>
-                    `;
+                    document.getElementById('schoolsListContainer').innerHTML =
+                        '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--error)"></i><p>Error loading schools: ' + (result.error || 'Unknown error') + '</p></div>';
                 }
             } catch (error) {
-                document.getElementById('schoolsListContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-wifi" style="color:var(--error)"></i>
-                        <p>Network error. Please check your connection.</p>
-                    </div>
-                `;
+                document.getElementById('schoolsListContainer').innerHTML =
+                    '<div class="empty-state"><i class="fas fa-wifi" style="color:var(--error)"></i><p>Network error. Please check your connection.</p></div>';
             } finally {
                 hideAlert('manageLoading');
             }
@@ -1150,12 +1142,7 @@
             const container = document.getElementById('schoolsListContainer');
 
             if (schools.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-school"></i>
-                        <p>No schools registered yet.</p>
-                    </div>
-                `;
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-school"></i><p>No schools registered yet.</p></div>';
                 return;
             }
 
@@ -1168,19 +1155,17 @@
                 const expiryText = school.Expiry_Date ? formatDate(school.Expiry_Date) : 'N/A';
                 const expiredBadge = isExpired ? '<span class="status-badge status-expired" style="margin-left:8px;">EXPIRED</span>' : '';
 
-                return `
-                    <div class="school-item">
-                        <div class="school-item-info">
-                            <h4>${escapeHtml(school.School_Name || 'Unnamed')}</h4>
-                            <p>${escapeHtml(school.Address || 'No address')} · ${school.Plan || 'Free'} Plan · Expires: ${expiryText}</p>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <span class="status-badge ${statusClass}">${school.Status || 'Unknown'}</span>
-                            ${expiredBadge}
-                            <div class="school-item-id">${school.School_ID || 'N/A'}</div>
-                        </div>
-                    </div>
-                `;
+                return '<div class="school-item">' +
+                    '<div class="school-item-info">' +
+                        '<h4>' + escapeHtml(school.School_Name || 'Unnamed') + '</h4>' +
+                        '<p>' + escapeHtml(school.Address || 'No address') + ' · ' + (school.Plan || 'Free') + ' Plan · Expires: ' + expiryText + '</p>' +
+                    '</div>' +
+                    '<div style="display:flex;align-items:center;gap:10px;">' +
+                        '<span class="status-badge ' + statusClass + '">' + (school.Status || 'Unknown') + '</span>' +
+                        expiredBadge +
+                        '<div class="school-item-id">' + (school.School_ID || 'N/A') + '</div>' +
+                    '</div>' +
+                '</div>';
             }).join('');
         }
 
@@ -1198,7 +1183,7 @@
         }
 
         // ============================================
-        // RENEW SUBSCRIPTION
+        // RENEW SUBSCRIPTION - USING GET
         // ============================================
         async function findSchoolForRenew() {
             const schoolId = document.getElementById('renewSchoolId').value.trim().toUpperCase();
@@ -1212,12 +1197,10 @@
             showAlert('renewLoading');
 
             try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getSchool', schoolId: schoolId })
+                const result = await gasGet({
+                    action: 'getSchool',
+                    schoolId: schoolId
                 });
-                const result = await response.json();
 
                 if (result.success && result.data) {
                     currentRenewSchool = result.data;
@@ -1240,61 +1223,37 @@
             document.getElementById('renewSchoolIdDisplay').textContent = currentRenewSchool.School_ID;
             document.getElementById('confirmSchoolName').textContent = currentRenewSchool.School_Name;
 
-            // Populate subscription info
             const expiryDate = currentRenewSchool.Expiry_Date ? new Date(currentRenewSchool.Expiry_Date) : null;
             const today = new Date();
             const isExpired = expiryDate ? today > expiryDate : true;
             const daysRemaining = expiryDate ? Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24)) : 0;
 
-            let statusHtml = `
-                <div class="sub-info-row">
-                    <span class="sub-info-label">Current Plan</span>
-                    <span class="sub-info-value">${currentRenewSchool.Plan || 'Free'}</span>
-                </div>
-                <div class="sub-info-row">
-                    <span class="sub-info-label">Status</span>
-                    <span class="sub-info-value">${currentRenewSchool.Status || 'Unknown'}</span>
-                </div>
-                <div class="sub-info-row">
-                    <span class="sub-info-label">Current Expiry</span>
-                    <span class="sub-info-value">${currentRenewSchool.Expiry_Date ? formatDate(currentRenewSchool.Expiry_Date) : 'Not set'}</span>
-                </div>
-                <div class="sub-info-row">
-                    <span class="sub-info-label">Students Limit</span>
-                    <span class="sub-info-value">${currentRenewSchool.Max_Students || 'N/A'}</span>
-                </div>
-                <div class="sub-info-row">
-                    <span class="sub-info-label">Attendants Limit</span>
-                    <span class="sub-info-value">${currentRenewSchool.Max_Attendants || 'N/A'}</span>
-                </div>
-            `;
+            let statusHtml =
+                '<div class="sub-info-row"><span class="sub-info-label">Current Plan</span><span class="sub-info-value">' + (currentRenewSchool.Plan || 'Free') + '</span></div>' +
+                '<div class="sub-info-row"><span class="sub-info-label">Status</span><span class="sub-info-value">' + (currentRenewSchool.Status || 'Unknown') + '</span></div>' +
+                '<div class="sub-info-row"><span class="sub-info-label">Current Expiry</span><span class="sub-info-value">' + (currentRenewSchool.Expiry_Date ? formatDate(currentRenewSchool.Expiry_Date) : 'Not set') + '</span></div>' +
+                '<div class="sub-info-row"><span class="sub-info-label">Students Limit</span><span class="sub-info-value">' + (currentRenewSchool.Max_Students || 'N/A') + '</span></div>' +
+                '<div class="sub-info-row"><span class="sub-info-label">Attendants Limit</span><span class="sub-info-value">' + (currentRenewSchool.Max_Attendants || 'N/A') + '</span></div>';
 
             if (!isExpired && daysRemaining > 0) {
-                statusHtml += `
-                    <div class="sub-info-row">
-                        <span class="sub-info-label">Days Remaining</span>
-                        <span class="sub-info-value" style="color:var(--success)">${daysRemaining} days</span>
-                    </div>
-                `;
+                statusHtml += '<div class="sub-info-row"><span class="sub-info-label">Days Remaining</span><span class="sub-info-value" style="color:var(--success)">' + daysRemaining + ' days</span></div>';
             }
 
             document.getElementById('renewSubInfo').innerHTML = statusHtml;
 
-            // Show expiry warning
             const warningDiv = document.getElementById('renewExpiryWarning');
             if (isExpired) {
                 warningDiv.classList.remove('hidden');
                 warningDiv.className = 'expiry-warning expiry-danger';
-                warningDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Subscription has expired! Renew now to reactivate.`;
+                warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Subscription has expired! Renew now to reactivate.';
             } else if (daysRemaining <= 7) {
                 warningDiv.classList.remove('hidden');
                 warningDiv.className = 'expiry-warning';
-                warningDiv.innerHTML = `<i class="fas fa-clock"></i> Subscription expires in ${daysRemaining} days. Renew now to avoid interruption.`;
+                warningDiv.innerHTML = '<i class="fas fa-clock"></i> Subscription expires in ' + daysRemaining + ' days. Renew now to avoid interruption.';
             } else {
                 warningDiv.classList.add('hidden');
             }
 
-            // Calculate price
             calculateRenewPrice();
         }
 
@@ -1332,9 +1291,9 @@
             if (plan === 'Free') {
                 document.getElementById('renewPriceDetail').textContent = 'Free plan - No payment required';
             } else {
-                let detail = `${selectedRenewMonths} months × ₦${pricePerMonth.toLocaleString()}/month`;
+                let detail = selectedRenewMonths + ' months × ₦' + pricePerMonth.toLocaleString() + '/month';
                 if (discount > 0) {
-                    detail += ` (-${(discount * 100)}% discount)`;
+                    detail += ' (-' + (discount * 100) + '% discount)';
                 }
                 document.getElementById('renewPriceDetail').textContent = detail;
             }
@@ -1367,20 +1326,15 @@
             hideAlert('renewSuccess');
 
             try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'renewSubscription',
-                        schoolId: currentRenewSchool.School_ID,
-                        months: selectedRenewMonths
-                    })
+                const result = await gasGet({
+                    action: 'renewSubscription',
+                    schoolId: currentRenewSchool.School_ID,
+                    months: selectedRenewMonths
                 });
-                const result = await response.json();
 
                 if (result.success) {
                     document.getElementById('modalTitle').textContent = 'Subscription Renewed!';
-                    document.getElementById('modalDesc').textContent = `Subscription for ${currentRenewSchool.School_Name} has been extended.`;
+                    document.getElementById('modalDesc').textContent = 'Subscription for ' + currentRenewSchool.School_Name + ' has been extended.';
                     document.getElementById('modalSchoolId').textContent = currentRenewSchool.School_ID;
                     document.getElementById('modalBtnText').textContent = 'Renew Another';
                     document.getElementById('successModal').classList.add('show');
